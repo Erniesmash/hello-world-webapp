@@ -48,7 +48,6 @@ pipeline {
 
         stage('Deploy') {
             steps {
-
                 withCredentials([
                     usernamePassword(
                         credentialsId: "${TOMCAT_CREDENTIALS}",
@@ -60,7 +59,7 @@ pipeline {
                     bat '''
                     curl -v ^
                     -u %USER%:%PASS% ^
-                    -T target\\*.war ^
+                    -T target\\hello-world-app-1.0-SNAPSHOT.war ^
                     "%TOMCAT_URL%/manager/text/deploy?path=/myapp&update=true"
                     '''
                 }
