@@ -2,13 +2,12 @@ pipeline {
     agent any
 
     tools {
-        jdk 'JDK17'
-        maven 'Maven3'
+        jdk 'JDK17'          // Change to your JDK tool name in Jenkins
+        maven 'Maven3'       // Change to your Maven tool name in Jenkins
     }
 
     environment {
-        GIT_URL = 'https://github.com/Erniesmash/hello-world-webapp'
-        GIT_CREDENTIALS = 'git-ssh'
+        GIT_URL = 'https://github.com/Erniesmash/hello-world-webapp.git'
 
         TOMCAT_URL = 'http://localhost:9090'
         TOMCAT_CREDENTIALS = 'tomcat-manager'
@@ -19,20 +18,19 @@ pipeline {
         stage('Checkout') {
             steps {
                 git branch: 'main',
-                    credentialsId: "${GIT_CREDENTIALS}",
                     url: "${GIT_URL}"
             }
         }
 
         stage('Build') {
             steps {
-                sh 'mvn clean compile'
+                bat 'mvn clean compile'
             }
         }
 
         stage('Test') {
             steps {
-                sh 'mvn test'
+                bat 'mvn test'
             }
 
             post {
@@ -44,12 +42,11 @@ pipeline {
 
         stage('Package') {
             steps {
-                sh 'mvn package'
+                bat 'mvn package'
             }
         }
 
         stage('Deploy') {
-
             steps {
 
                 withCredentials([
@@ -60,11 +57,11 @@ pipeline {
                     )
                 ]) {
 
-                    sh '''
-                    curl -v \
-                    -u $USER:$PASS \
-                    -T target/*.war \
-                    "http://localhost:8080/manager/text/deploy?path=/myapp&update=true"
+                    bat '''
+                    curl -v ^
+                    -u %USER%:%PASS% ^
+                    -T target\\*.war ^
+                    "%TOMCAT_URL%/manager/text/deploy?path=/myapp&update=true"
                     '''
                 }
             }
@@ -74,15 +71,15 @@ pipeline {
     post {
 
         success {
-            echo "Deployment Successful!"
+            echo 'Deployment Successful!'
         }
 
         failure {
-            echo "Deployment Failed!"
+            echo 'Deployment Failed!'
         }
 
         always {
-            cleanWs()
+            deleteDir()
         }
     }
 }
